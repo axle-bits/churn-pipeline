@@ -135,21 +135,28 @@ def _ec2_instance_details():
     token = urllib.request.urlopen(token_req, timeout=1).read().decode()
 
     def get(item):
-        req = urllib.request.Request(
-            f"{base}/meta-data/{item}",
-            headers={"X-aws-ec2-metadata-token": token},
-        )
-        return urllib.request.urlopen(req, timeout=1).read().decode()
+        # Some fields don't exist on every instance (e.g. no public-ipv4 on a
+        # private subnet) - a missing field must not fail the whole lookup.
+        try:
+            req = urllib.request.Request(
+                f"{base}/meta-data/{item}",
+                headers={"X-aws-ec2-metadata-token": token},
+            )
+            return urllib.request.urlopen(req, timeout=1).read().decode()
+        except Exception:
+            return None
 
-    return {
+    details = {
         "cloud_provider": "AWS EC2",
         "instance_id": get("instance-id"),
         "instance_type": get("instance-type"),
         "region": get("placement/region"),
         "availability_zone": get("placement/availability-zone"),
         "public_ip": get("public-ipv4"),
+        "private_ip": get("local-ipv4"),
         "ami_id": get("ami-id"),
     }
+    return {k: v for k, v in details.items() if v is not None}
 
 
 @app.get("/api/deployment-info")

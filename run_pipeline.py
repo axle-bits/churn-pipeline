@@ -26,8 +26,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger("churn_pipeline")
 
+# Keep AWS SDK internals (credential/IAM lookups, HTTP retries) out of our logs
+logging.getLogger("botocore").setLevel(logging.WARNING)
+logging.getLogger("boto3").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline"))
+
+from ingestion import ingest_data
+from preprocessing import preprocess
+from eda import run_eda
+from train_evaluate import load_features, train_models, evaluate_model
+from mlops_logger import log_run, push_run_metrics
+
 # Cloud mode: when CHURN_CLOUDWATCH=1, every log line is ALSO streamed to an
 # AWS CloudWatch log group so the runs can be monitored on a cloud dashboard.
+# NOTE: this handler must be attached AFTER the pipeline imports above -
+# importing mlflow reconfigures Python logging and closes any handlers
+# attached before it, which would silently kill the CloudWatch stream.
 CLOUDWATCH_ENABLED = os.environ.get("CHURN_CLOUDWATCH") == "1"
 if CLOUDWATCH_ENABLED:
     try:
@@ -40,15 +57,6 @@ if CLOUDWATCH_ENABLED:
         logger.info("CloudWatch log streaming enabled (log group: churn-pipeline-logs)")
     except Exception as e:
         logger.warning(f"Could not enable CloudWatch logging, continuing with local logs only: {e}")
-
-import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline"))
-
-from ingestion import ingest_data
-from preprocessing import preprocess
-from eda import run_eda
-from train_evaluate import load_features, train_models, evaluate_model
-from mlops_logger import log_run, push_run_metrics
 
 
 def run_once():
