@@ -1,0 +1,22 @@
+# Core data science / pipeline
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+scipy
+joblib
+
+# API layer
+fastapi
+uvicorn[standard]
+
+# DataOps scheduling (optional but recommended)
+apscheduler
+
+# MLOps tracking (optional - code auto-detects if this is missing)
+mlflow
+
+# AWS cloud deployment (S3 ingestion, CloudWatch logs/metrics/dashboard)
+boto3
+watchtower

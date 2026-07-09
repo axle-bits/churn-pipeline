@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Generated pipeline outputs (recreated on every run)
+data/telco_churn_preprocessed.csv
+data/telco_churn_eda.csv
+logs/*.log
+logs/*.csv
+models/*.pkl
+artifacts/*.png
+mlruns/
+
+# Background process output files (nohup)
+*.out
+
+# Report screenshots stay local - never push (may contain console/account details)
+screenshots/
+screenshot/
