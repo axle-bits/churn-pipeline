@@ -81,10 +81,15 @@ source venv/bin/activate
 pip install -r requirements.txt        # takes a few minutes
 
 # Cloud-mode switches (also add these lines to ~/.bashrc so they persist)
-export CHURN_S3_BUCKET=churn-pipeline-raw-group43
+export CHURN_S3_BUCKET=<your-actual-bucket-name>
+export CHURN_S3_KEY=data/telco_churn_raw.csv   # object key INCLUDING any folder prefix in the bucket
 export CHURN_CLOUDWATCH=1
 export AWS_DEFAULT_REGION=us-east-1
 ```
+
+> `CHURN_S3_KEY` must match the object's full key. Our CSV was uploaded into a
+> `data/` folder in the bucket, so the key is `data/telco_churn_raw.csv` — if
+> yours is at the bucket root, use just `telco_churn_raw.csv`.
 
 ## Step 6 — Run the pipeline once and verify CloudWatch
 
